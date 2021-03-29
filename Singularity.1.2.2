@@ -1,0 +1,27 @@
+Bootstrap: docker
+#From: bioconductor/bioconductor_docker:3.12
+From: bioconductor/bioconductor_docker:RELEASE_3_12
+
+%labels
+Maintainer bjoern.pauly@plantandfood.co.nz
+Version 1.2.2
+
+%post
+  ## Download build prerequisites
+  apt-get -y update
+  apt-get -y install git libboost-all-dev
+
+  cd /opt
+  git clone https://github.com/kundajelab/phantompeakqualtools
+  cd phantompeakqualtools
+
+## R install ...
+  Rscript -e 'install.packages(c("snow", "snowfall","bitops","caTools"),repos = "http://cran.us.r-project.org"); BiocManager::install(c("Rsamtools", "spp"),update=FALSE)'
+
+  ## Cleanup
+  apt-get -y remove git
+  apt-get -y autoremove
+  apt-get -y clean all
+
+%runscript
+  exec Rscript /opt/phantompeakqualtools/run_spp.R "$@"
